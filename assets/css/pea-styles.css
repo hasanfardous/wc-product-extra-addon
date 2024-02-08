@@ -1,0 +1,35 @@
+.pea-product-addon-wrap {
+    margin-top: 24px;
+}
+
+.pea-product-addon-wrap #pea-accordion h3 {
+    background: #1e237d;
+    border-color: #1e237d;
+    color: #fff;
+    font-weight: bold;
+}
+
+.pea-product-addon-wrap {}
+
+.pea-product-addon-wrap h2.pea-accordion-header {
+    font-size: 24px;
+}
+
+.pea-single-price-element {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+#pea-accordion .pea-prices-wrap {
+    padding: 12px;
+}
+
+.pea-single-price-element label {
+    cursor: pointer;
+}
+
+.pea-single-price-element label input {
+    vertical-align: middle;
+    margin-right: 4px;
+}
