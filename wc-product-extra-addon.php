@@ -23,10 +23,15 @@ class WC_Product_Extra_Addon {
 
     // Initiate the necessary functions
     function init() {
-        //Enqueue Scripts
+        // Enqueue Scripts
         add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
-        //Enqueue Scripts
-        add_action('woocommerce_product_meta_end', [$this, 'product_addons']);
+        // Extra Product Addon
+        add_action('woocommerce_product_meta_end', [$this, 'extra_product_addons']);
+
+        // Update Product Price
+        add_action('woocommerce_before_calculate_totals', [$this, 'update_product_price'], 10, 1);
+        // Save Extra Option to Cart
+        add_filter('woocommerce_add_cart_item_data', [$this, 'save_extra_option_to_cart'], 10, 3);
     }
 
     //Enqueue Scripts Callback
@@ -52,10 +57,58 @@ class WC_Product_Extra_Addon {
         );
     }
 
-    //Enqueue Scripts Callback
-    function product_addons() {
+    // Add Extra Product Addons
+    function extra_product_addons() {
         // Load product addon 
-        include $this->plugin_dir . 'inc/product-addon.php';
+        include $this->plugin_dir . 'inc/extra-product-addon.php';
+    }
+
+    // Update the product price based on selected extra option
+    function update_product_price($cart) {
+        if (is_admin() && !defined('DOING_AJAX')) return;
+
+        // foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
+        //     if (isset($cart_item['pea_extra_option'])) {
+        //         $extra_option_price = (float)$cart_item['pea_extra_option'];
+        //         $product = $cart_item['data'];
+        //         $price = $product->get_price();
+        //         $product->set_price($price + $extra_option_price);
+        //     }
+        // }
+
+        // foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
+        //     if (isset($cart_item['pea_extra_option'])) {
+        //         $extra_option_price = (float)$cart_item['pea_extra_option'];
+        //         $product = $cart_item['data'];
+        //         $price = $product->get_price();
+        //         $new_price = $price + $extra_option_price;
+        //         $cart_item['data']->set_price($new_price);
+        //     }
+        // }
+        foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
+            if (isset($cart_item['variation_id']) && isset($cart_item['pea_extra_option'])) {
+                $extra_option_price = (float)$cart_item['pea_extra_option'];
+                $variation = wc_get_product($cart_item['variation_id']);
+                $price = $variation->get_price();
+                $new_price = $price + $extra_option_price;
+                $variation->set_price($new_price);
+            }
+        }
+        
+        // foreach ($cart_object->cart_contents as $cart_item_key => $cart_item) {
+        //     // if ( null !== $cart_item['data']->is_type('variable') ) {
+        //         $extra_option_price = isset($cart_item['pea_extra_option']) ? (float)$cart_item['pea_extra_option'] : 0;
+        //         $cart_item['data']->set_price($cart_item['data']->get_price() + $extra_option_price);
+        //     // }
+        // }
+    }
+
+    // Save selected extra option to cart item
+    function save_extra_option_to_cart($cart_item_data, $product_id, $variation_id) {
+        if (isset($_POST['pea_extra_option'])) {
+            $cart_item_data['pea_extra_option'] = wc_clean($_POST['pea_extra_option']);
+        }
+        return $cart_item_data;
     }
 }
 
